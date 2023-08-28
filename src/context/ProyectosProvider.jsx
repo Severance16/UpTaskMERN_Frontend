@@ -1,14 +1,39 @@
 import { useState, useEffect, createContext } from "react";
 import clienteAxios from "../config/clienteAxios";
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 
 const ProyectosContext = createContext();
 
 const ProyectosProvider = ({ children }) => {
   const [proyectos, setProyectos] = useState([]);
   const [alerta, setAlerta] = useState({});
+  const [proyecto, setProyecto] = useState({})
+  const [cargando, setCargando] = useState(false)
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const obtenerProyectos = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        };
+
+        const { data } = await clienteAxios("/proyectos", config);
+
+        setProyectos(data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    obtenerProyectos();
+  }, []);
 
   const mostrarAlerta = (alerta) => {
     setAlerta(alerta);
@@ -27,24 +52,44 @@ const ProyectosProvider = ({ children }) => {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
-        }
+        },
       };
-      const { data } = await clienteAxios.post('/proyectos', proyecto, config)
-      console.log(data)
+      const { data } = await clienteAxios.post("/proyectos", proyecto, config);
+      setProyectos([...proyectos, data]);
 
       setAlerta({
-        msg: 'Proyecto Creado Correctamente',
-        error: false
-      })
+        msg: "Proyecto Creado Correctamente",
+        error: false,
+      });
     } catch (error) {
       console.log(error);
     }
 
     setTimeout(() => {
-      setAlerta({})
-      navigate('/proyectos')
-    },3000)
+      setAlerta({});
+      navigate("/proyectos");
+    }, 3000);
   };
+
+  const obtenerProyecto = async id =>{
+    setCargando(true)
+     try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const {data} = await clienteAxios(`/proyectos/${id}`, config)
+      setProyecto(data)
+     } finally {
+      setCargando(false)
+     }
+  }
 
   return (
     <ProyectosContext.Provider
@@ -53,6 +98,9 @@ const ProyectosProvider = ({ children }) => {
         alerta,
         mostrarAlerta,
         submitProyecto,
+        obtenerProyecto,
+        proyecto,
+        cargando
       }}
     >
       {children}

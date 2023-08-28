@@ -6,8 +6,9 @@ import Sidebar from "../components/Sidebar"
 const RutaProtegida = () => {
     const {auth, cargando} = useAuth()
     
-    if(cargando) return 'Cargando...'
-  return (
+
+    // TODO: Agregar spinner
+  return cargando ? 'Cargando...' : (
     <>
       {auth._id ? (
         <div className="bg-gray-100">
