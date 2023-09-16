@@ -7,8 +7,8 @@ const ProyectosContext = createContext();
 const ProyectosProvider = ({ children }) => {
   const [proyectos, setProyectos] = useState([]);
   const [alerta, setAlerta] = useState({});
-  const [proyecto, setProyecto] = useState({})
-  const [cargando, setCargando] = useState(false)
+  const [proyecto, setProyecto] = useState({});
+  const [cargando, setCargando] = useState(false);
 
   const navigate = useNavigate();
 
@@ -44,16 +44,14 @@ const ProyectosProvider = ({ children }) => {
   };
 
   const submitProyecto = async (proyecto) => {
-
-    if(proyecto.id){
+    if (proyecto.id) {
       await editarProyecto(proyecto);
     } else {
       await nuevoProyecto(proyecto);
     }
-  
   };
 
-  const editarProyecto = async proyecto => {
+  const editarProyecto = async (proyecto) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -65,35 +63,35 @@ const ProyectosProvider = ({ children }) => {
         },
       };
 
-      const { data } = await clienteAxios.put(`/proyectos/${proyecto.id}`, proyecto, config)
+      const { data } = await clienteAxios.put(
+        `/proyectos/${proyecto.id}`,
+        proyecto,
+        config
+      );
 
-    // Sincornizar el state
-      const proyectosActualizados = proyectos.map( proyectoState => proyectoState._id === data._id ? data : proyectoState)
-      setProyectos(proyectosActualizados)
+      // Sincornizar el state
+      const proyectosActualizados = proyectos.map((proyectoState) =>
+        proyectoState._id === data._id ? data : proyectoState
+      );
+      setProyectos(proyectosActualizados);
 
+      // Mostrar la alerta
+      setAlerta({
+        msg: "Proyecto Acutializado Correctamente",
+        error: false,
+      });
 
-    // Mostrar la alerta
-    setAlerta({
-      msg: "Proyecto Acutializado Correctamente",
-      error: false,
-    });
-
-    // Redireccionar      \
-    setTimeout(() => {
-      setAlerta({});
-      navigate("/proyectos");
-    }, 3000);
-
+      // Redireccionar      \
+      setTimeout(() => {
+        setAlerta({});
+        navigate("/proyectos");
+      }, 3000);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-
   };
 
-  
-
-  const nuevoProyecto = async proyecto => {
-    
+  const nuevoProyecto = async (proyecto) => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
@@ -121,9 +119,9 @@ const ProyectosProvider = ({ children }) => {
     }, 3000);
   };
 
-  const obtenerProyecto = async id =>{
-    setCargando(true)
-     try {
+  const obtenerProyecto = async (id) => {
+    setCargando(true);
+    try {
       const token = localStorage.getItem("token");
       if (!token) return;
 
@@ -134,12 +132,44 @@ const ProyectosProvider = ({ children }) => {
         },
       };
 
-      const {data} = await clienteAxios(`/proyectos/${id}`, config)
-      setProyecto(data)
-     } finally {
-      setCargando(false)
-     }
-  }
+      const { data } = await clienteAxios(`/proyectos/${id}`, config);
+      setProyecto(data);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const eliminarProyecto = async (id) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const { data } = await clienteAxios.delete(`/proyectos/${id}`, config);
+
+      // sincronizar el state
+      const proyectosActualizados = proyectos.filter(proyectoState => proyectoState._id !== id)
+      setProyectos(proyectosActualizados)
+      
+      setAlerta({
+        msg: data.msg,
+        error: false
+      })
+
+      setTimeout(() => {
+        setAlerta({});
+        navigate("/proyectos");
+      }, 3000);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <ProyectosContext.Provider
@@ -150,7 +180,8 @@ const ProyectosProvider = ({ children }) => {
         submitProyecto,
         obtenerProyecto,
         proyecto,
-        cargando
+        cargando,
+        eliminarProyecto,
       }}
     >
       {children}
