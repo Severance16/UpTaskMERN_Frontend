@@ -5,7 +5,7 @@ import useProyectos from "../hooks/useProyectos"
 
 export default function Tarea({tarea}) {
   
-  const { handleModalEditarTrea } = useProyectos()
+  const { handleModalEditarTrea, handleModalEliminarTarea } = useProyectos()
   const { descripcion, nombre, prioridad, fechaEntrega, estado, _id } = tarea
   
     return (
@@ -24,7 +24,7 @@ export default function Tarea({tarea}) {
             <button className="bg-gray-600 px-4 py-3 text-white uppercase font-bold text-sm rounded-lg">Incompleta</button>
         )}
 
-        <button className="bg-red-600 px-4 py-3 text-white uppercase font-bold text-sm rounded-lg">Eliminar</button>
+        <button className="bg-red-600 px-4 py-3 text-white uppercase font-bold text-sm rounded-lg" onClick={() => handleModalEliminarTarea(tarea)}>Eliminar</button>
       </div>
     </div>
   )
